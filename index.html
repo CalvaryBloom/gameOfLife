@@ -10,31 +10,278 @@
 
     <title>Juego de la Vida</title>
     <style>
-        canvas {
-            border: 1px solid;
-            image-rendering: pixelated;
+        :root {
+            --bg: #0f1724;
+            --bg-2: #071026;
+            --card: #0b1220;
+            --accent: #4f46e5;
+            --accent-2: #06b6d4;
+            --muted: #94a3b8;
+            --glass: rgba(255, 255, 255, 0.03);
+            --fg: #e6eef8;
+            --canvas-bg: #071028;
+        }
+
+        /* Tema claro */
+        [data-theme="light"] {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --accent: #2563eb;
+            --accent-2: #06b6d4;
+            --muted: #475569;
+            --glass: rgba(2, 6, 23, 0.03);
+            --fg: #0b1220;
+            --bg-2: #f1f5f9;
+            --canvas-bg: #ffffff;
+            color: #0b1220;
+        }
+
+        html,
+        body {
+            height: 100%;
         }
 
         body {
-            margin: 16px;
-            font-family: system-ui, sans-serif;
+            margin: 0;
+            min-height: 100%;
+            background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+            color: var(--fg);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px;
+        }
+
+        .card {
+            width: 960px;
+            max-width: calc(100% - 48px);
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(6px);
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 0.2px
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        header .theme-toggle {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            padding: 6px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: inherit
+        }
+
+        .layout {
+            display: flex;
+            gap: 20px
+        }
+
+        .board {
+            background: var(--card);
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        canvas {
+            background: var(--canvas-bg);
+            border-radius: 6px;
+            box-shadow: 0 6px 18px rgba(3, 7, 20, 0.6);
+            image-rendering: pixelated;
+            display: block
+        }
+
+        .controls {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px
+        }
+
+        .controls .group {
+            background: var(--glass);
+            padding: 12px;
+            border-radius: 8px
+        }
+
+        .controls button {
+            background: linear-gradient(180deg, var(--accent), #3b32b3);
+            border: 0;
+            color: var(--fg);
+            padding: 8px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600
+        }
+
+        .controls button.secondary {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--muted);
+            font-weight: 600
+        }
+
+        .controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(79, 70, 229, 0.16)
+        }
+
+        .info {
+            font-size: 14px;
+            color: var(--muted)
+        }
+
+        .pattern-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        @media (max-width:900px) {
+            .layout {
+                flex-direction: column
+            }
+
+            .controls {
+                width: 100%
+            }
+        }
+
+        /* transiciones suaves al cambiar tema */
+        body,
+        .card,
+        .board,
+        canvas,
+        .controls,
+        .group {
+            transition: background-color 220ms ease, color 220ms ease, box-shadow 220ms ease
         }
     </style>
 </head>
 
 <body>
-    <h1>Juego de la Vida</h1>
-    <canvas id="life" width="640" height="480"></canvas>
-    <div>
-        <button onclick="clearAll()">Limpiar</button>
-        <button onclick="resetBtn(0.20)">Reiniciar</button>
-        <button onclick="placeBlinker(5,5)">Blinker @ (5,5)</button>
-        <button onclick="placeToad(10,10)">Toad @ (10,10)</button>
-        <button onclick="placeBeacon(15,20)">Beacon @ (15,20)</button>
-        <button onclick="placeGlider(2,2)">Glider @ (2,2)</button>
+    <div class="card">
+        <header>
+            <div>
+                <h1>Juego de la Vida</h1>
+                <div class="subtitle">Conway — patrones interactivos</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+                <div class="info" id="info">Generación: 0</div>
+                <button id="themeToggle" class="theme-toggle" aria-label="Cambiar tema">Toggle</button>
+            </div>
+        </header>
+
+        <div class="layout">
+            <div class="board">
+                <canvas id="life" width="640" height="480"></canvas>
+            </div>
+
+            <aside class="controls">
+                <div class="group">
+                    <div style="display:flex;gap:8px;margin-bottom:8px">
+                        <button onclick="clearAll()" class="secondary">Limpiar</button>
+                        <button onclick="resetBtn(0.20)" class="secondary">Reiniciar</button>
+                    </div>
+                    <div style="font-size:13px;color:var(--muted);">Patrones rápidos</div>
+                    <div class="pattern-list">
+                        <button onclick="placeBlinker(5,5)">Blinker @ (5,5)</button>
+                        <button onclick="placeToad(10,10)">Toad @ (10,10)</button>
+                        <button onclick="placeBeacon(15,20)">Beacon @ (15,20)</button>
+                        <button onclick="placeGlider(2,2)">Glider @ (2,2)</button>
+                    </div>
+                </div>
+
+                <div class="group">
+                    <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Más acciones</div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        <button onclick="placeGlider(20,30)">Añadir Glider @ (20,30)</button>
+                        <button onclick="placeBlinker(30,40)">Añadir Blinker @ (30,40)</button>
+                        <button onclick="randomize(0.15)" class="secondary">Aleatorio 15%</button>
+                    </div>
+                </div>
+                <div class="group">
+                    <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Ajustes visuales</div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        <label style="font-size:13px;display:flex;justify-content:space-between;align-items:center">
+                            <span>Cell size</span>
+                            <span id="cellSizeVal">8</span>
+                        </label>
+                        <input id="cellSizeRange" type="range" min="4" max="24" value="8">
+
+                        <label style="font-size:13px;display:flex;justify-content:space-between;align-items:center">
+                            <span>FPS</span>
+                            <span id="fpsVal">8</span>
+                        </label>
+                        <input id="fpsRange" type="range" min="1" max="30" value="8">
+                    </div>
+                </div>
+            </aside>
+        </div>
+
     </div>
-    <p id="info">Generación: 0</p>
+
     <script src="js/Ejercicio_5.js"></script>
+    <script>
+        // Manejador de tema: alternar y persistir en localStorage
+        const toggle = document.getElementById('themeToggle');
+        const root = document.documentElement;
+        function applyTheme(theme) {
+            if (theme === 'light') root.setAttribute('data-theme', 'light');
+            else root.removeAttribute('data-theme');
+            localStorage.setItem('gotl-theme', theme);
+            // icon: sol si modo claro, luna si oscuro
+            toggle.innerText = theme === 'light' ? '☀️' : '🌙';
+            // actualizar canvas color si draw está disponible
+            if (window.draw) window.draw();
+        }
+        // cargar preferencia
+        const saved = localStorage.getItem('gotl-theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        applyTheme(saved);
+        toggle.addEventListener('click', () => applyTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light'));
+    </script>
+    <script>
+        // Sliders para tamaño de celda y FPS
+        const cellRange = document.getElementById('cellSizeRange');
+        const cellVal = document.getElementById('cellSizeVal');
+        const fpsRange = document.getElementById('fpsRange');
+        const fpsVal = document.getElementById('fpsVal');
+        if (cellRange && window.setCellSize) {
+            cellRange.addEventListener('input', (e) => {
+                const v = e.target.value;
+                cellVal.innerText = v;
+                window.setCellSize(Number(v));
+            });
+        }
+        if (fpsRange && window.setFPS) {
+            fpsRange.addEventListener('input', (e) => {
+                const v = e.target.value;
+                fpsVal.innerText = v;
+                window.setFPS(Number(v));
+            });
+        }
+    </script>
 </body>
 
 </html>
