@@ -94,6 +94,7 @@ function loop() {
     }
     requestAnimationFrame(loop);
 }
+
 loop();
 // (Espacio) para pausar/reanudar
 document.addEventListener('keydown', (e) => {
