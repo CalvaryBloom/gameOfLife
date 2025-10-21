@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Game of Life.">
+    <meta name="author" content="Borja Pardo">
+    <meta name="generator" content="VS Code">
+
+    <title>Juego de la Vida</title>
+    <style>
+        canvas {
+            border: 1px solid;
+            image-rendering: pixelated;
+        }
+
+        body {
+            margin: 16px;
+            font-family: system-ui, sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Juego de la Vida</h1>
+    <canvas id="life" width="640" height="480"></canvas>
+    <div>
+        <button onclick="clearAll()">Limpiar</button>
+        <button onclick="resetBtn(0.20)">Reiniciar</button>
+        <button onclick="placeBlinker(5,5)">Blinker @ (5,5)</button>
+        <button onclick="placeToad(10,10)">Toad @ (10,10)</button>
+        <button onclick="placeBeacon(15,20)">Beacon @ (15,20)</button>
+        <button onclick="placeGlider(2,2)">Glider @ (2,2)</button>
+    </div>
+    <p id="info">Generación: 0</p>
+    <script src="js/Ejercicio_5.js"></script>
+</body>
+
+</html>
